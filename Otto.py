@@ -1,6 +1,4 @@
-import pprint
 import google.generativeai as palm # https://developers.generativeai.google/api/python/google/generativeai
-import numpy
 import logging
 
 def ask(model, prompt:str, n_attempts:int=5):
