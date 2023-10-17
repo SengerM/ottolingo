@@ -42,7 +42,7 @@ def ask_Otto(word:str, sentence:str):
 if __name__ == '__main__':
 	import sys
 	import pandas
-	from SECRET import get_api_key
+	from SECRET import GOOGLE_API_KEY
 	
 	logging.basicConfig(
 		stream = sys.stderr, 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 		datefmt = '%H:%M:%S',
 	)
 	
-	palm.configure(api_key=get_api_key())
+	palm.configure(api_key=GOOGLE_API_KEY)
 	
 	vocabulary = pandas.read_csv('vocabulary.csv').set_index('DE')
 	
