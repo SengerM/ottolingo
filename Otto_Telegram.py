@@ -1,6 +1,8 @@
 from Otto import ask_Otto
 from telegram import Update # https://github.com/python-telegram-bot/python-telegram-bot
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, CommandHandler, ContextTypes # https://github.com/python-telegram-bot/python-telegram-bot
+import pandas
+from random import shuffle
 
 class ListIterator:
 	def __init__(self, l:list):
@@ -19,34 +21,43 @@ class ListIterator:
 	
 	def reset(self):
 		self._current_idx = 0
+	
+	def shuffle(self):
+		shuffle(self.l)
 
-import pandas
-
-vocabulary = pandas.read_csv('vocabulary.csv').set_index('DE')
-vocabulary = vocabulary.sample(frac=1)
-words = ListIterator(list(vocabulary.index))
+# ~ vocabulary = pandas.read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vSHqT2RQ8-hQiK59S463CW5XNNhy81n_NCY3ihB00E9azvCk7ePsv_GtpNns5dOVRLsosEmRP_36ug8/pub?gid=0&single=true&output=csv').set_index('DE')
+# ~ words = ListIterator(list(vocabulary.index))
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	words.reset()
+	
+	globals()['vocabulary'] = pandas.read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vSHqT2RQ8-hQiK59S463CW5XNNhy81n_NCY3ihB00E9azvCk7ePsv_GtpNns5dOVRLsosEmRP_36ug8/pub?gid=0&single=true&output=csv').set_index('DE')
+	globals()['words'] = ListIterator(list(globals()['vocabulary'].index))
+	globals()['words'].shuffle()
+	
 	await context.bot.send_message(
 		chat_id = update.effective_chat.id, 
 		text = f"Hallo, ich bin Otto, dein Lehrer! Bitte schreiben Sie eine Satzt mit {repr(words.current())} ({vocabulary.loc[words.current(),'EN']}) oder einen variation.",
 	)
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	response = ask_Otto(
-		word = words.current(),
-		sentence = update.message.text,
-	)
-	response += '\n\n'
-	try:
-		response += f'Bitte schreiben Sie eine Satzt mit {repr(words.next())} ({vocabulary.loc[words.current(),"EN"]}) oder einen variation.'
-	except StopIteration:
-		response += 'Gratulazionen! Sie haben alle Wörter geubungt.'
+	if 'vocabulary' not in globals():
+		response = 'Please initialize Otto by sending /start'
+	else:
+		response = ask_Otto(
+			word = words.current(),
+			sentence = update.message.text,
+		)
+		response += '\n\n'
+		try:
+			response += f'Bitte schreiben Sie eine Satzt mit {repr(words.next())} ({vocabulary.loc[words.current(),"EN"]}) oder einen variation.'
+		except StopIteration:
+			response += 'Gratulazionen! Sie haben alle Wörter geubungt. Wir fangen wieder an.\n\n'
+			words.shuffle()
+			words.reset()
+			response += f'Bitte schreiben Sie eine Satzt mit {repr(words.current())} ({vocabulary.loc[words.current(),"EN"]}) oder einen variation.'
 	await context.bot.send_message(chat_id=update.effective_chat.id, text=response)
 
 if __name__ == '__main__':
-	import pandas
 	from SECRET import GOOGLE_API_KEY, TELEGRAM_BOT_TOKEN
 	import google.generativeai as palm # https://developers.generativeai.google/api/python/google/generativeai
 	
