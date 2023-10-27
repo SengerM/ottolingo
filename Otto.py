@@ -20,9 +20,14 @@ def ask(model, prompt:str, n_attempts:int=5):
 def ask_Otto(word:str, sentence:str):
 	def generate_prompt(word:str, sentence:str):
 		return f"""
-		You are a German teacher and I am your student. Below there is a sentence I have formulated using the expression {repr(word)} or a variation of it. Please tell if it contains any mistake and fix if yes. Very important: Write strictly in English, except for the sentence itself if it needs corrections.
-
-		{sentence}
+		Below there is a sentence in German that you have to revise. If you don't find any mistake, I want you to reply with "The scentence conatins no mistakes.", otherwise please answer with a correction of the sentence.
+		
+		Important:
+		1. Any explanation that you provide has to be strictly in English.
+		2. If you provide a corrected version of the sentence, the sentence itself must be in German.
+		
+		This is the sentence:
+		{repr(sentence)}
 		"""
 	
 	response = "Don't know, sorry"
@@ -53,7 +58,7 @@ if __name__ == '__main__':
 	
 	palm.configure(api_key=GOOGLE_API_KEY)
 	
-	vocabulary = pandas.read_csv('vocabulary.csv').set_index('DE')
+	vocabulary = pandas.read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vSHqT2RQ8-hQiK59S463CW5XNNhy81n_NCY3ihB00E9azvCk7ePsv_GtpNns5dOVRLsosEmRP_36ug8/pub?gid=0&single=true&output=csv').set_index('DE')
 	
 	while True:
 		for word, translations in vocabulary.sample(frac=1).iterrows():
