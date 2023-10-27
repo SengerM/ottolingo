@@ -49,7 +49,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 		)
 		response += '\n\n'
 		try:
-			response += f'Bitte schreiben Sie eine Satzt mit {repr(words.next())} ({vocabulary.loc[words.current(),"EN"]}) oder einen variation.'
+			response += f'Jetzt mit {repr(words.next())} ({vocabulary.loc[words.current(),"EN"]}).'
 		except StopIteration:
 			response += 'Gratulazionen! Sie haben alle Wörter geubungt. Wir fangen wieder an.\n\n'
 			words.shuffle()
