@@ -1,9 +1,9 @@
 import google.generativeai as palm # https://developers.generativeai.google/api/python/google/generativeai
 import logging
 
-def ask(prompt:str, n_attempts:int=5, model='models/text-bison-001'):
+def ask(prompt:str, n_attempts:int=5, model='models/text-bison-001', initial_temperature=.1):
 	response = None
-	temperature = .1
+	temperature = initial_temperature
 	while response is None or response.result is None or n_attempts>0:
 		response = palm.generate_text(
 			model = model,
@@ -48,12 +48,13 @@ def generate_example_with(word:str):
 		Provide an example in German using {repr(word)}.
 		
 		Important:
-		1. The example must be longer than 8 words.
+		1. The example MUST be longer than 8 words and be creative.
 		2. Your answer must be in the following format: <german_example>|<english_translation>|<25_words_in_english>.
 		3. You replace <german_example> with the example.
 		4. You replace <english_translation> with the translation to English.
 		5. You replace <25_words_in_english> with 25 random words in English 
 		6. Your answer doesn't have anything else.
+		7. Your example must be longer than 8 words.
 		"""
 	# The 25 words in English in the prompt are because Google blocks answers that are not in English, so I have to make it look like it is in English.
 	response = "Don't know, sorry"
@@ -61,6 +62,7 @@ def generate_example_with(word:str):
 		r = ask(
 			prompt = prompt,
 			n_attempts = 5,
+			initial_temperature = .9,
 		)
 		if isinstance(r.result, str):
 			response = r.result
